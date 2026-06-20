@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XatSpace • DaileeeAzul</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script type="module" crossorigin src="/xatspace/assets/index-BG3YLIV6.js"></script>
+  <link rel="stylesheet" crossorigin href="/xatspace/assets/index-CbKOUjmh.css">
+</head>
+
+<body>
+
+  <div id="bg"><img src="/xatspace/fondokpop.png" alt="nature background"></div>
+  <canvas id="cv"></canvas>
+  <div id="cursor-glow"></div>
+
+  <div id="page">
+
+
+    <header id="hdr" class="rv">
+      <div class="hdr-glow"></div>
+      <div class="hdr-eye">✦ xat.me / DaileeeAzul ✦</div>
+      <h1 class="hdr-title">𝓜𝓮𝓵𝓪𝓷𝓲𝓮</h1>
+      <p class="hdr-sub">제 약력에 오신 것을 환영합니다</p>
+      <div class="tags" style="margin-top: 20px; justify-content: center; gap: 12px;">
+        <span class="tag"><i class="fas fa-globe"></i> Korea</span>
+        <span class="tag"><i class="fas fa-cake-candles"></i> 22 years</span>
+        <span class="tag"><i class="fas fa-heart"></i> Love</span>
+        <span class="tag"><i class="fas fa-star"></i> Gemini</span>
+        <span class="tag"><i class="fas fa-music"></i> K-Pop</span>
+      </div>
+      <div class="hdr-line"></div>
+    </header>
+
+
+    <aside id="prof" class="card rv">
+      <div class="av-wrap">
+        <img src="/xatspace/assets/myimage-CBslx35_.jpg" alt="Avatar">
+      </div>
+
+      <div class="pname">(115963356)</div>
+
+      <div class="pdiv"></div>
+
+      <div class="irow tab-btn-row active" data-target="tab-bio">
+        <i class="fas fa-user"></i><span class="ilabel">About me</span><span class="ivalue">›</span>
+      </div>
+      <div class="irow tab-btn-row" data-target="tab-playlist">
+        <i class="fas fa-music"></i><span class="ilabel">My Playlist</span><span class="ivalue">›</span>
+      </div>
+      <div class="irow tab-btn-row" data-target="tab-videos">
+        <i class="fas fa-video"></i><span class="ilabel">My Videos</span><span class="ivalue">›</span>
+      </div>
+      <div class="irow tab-btn-row" data-target="tab-galeria">
+        <i class="fas fa-images"></i><span class="ilabel">My Gallery</span><span class="ivalue">›</span>
+      </div>
+      <a href="https://xat.me/1559430787" target="_blank" class="irow"
+        style="text-decoration: none; color: inherit; cursor: none;">
+        <i class="fas fa-user-friends"></i><span class="ilabel">My Sister</span><span class="ivalue">›</span>
+      </a>
+    </aside>
+
+
+    <div id="rcol">
+      <div id="media-tabs" class="card rv">
+
+
+        <div class="tab-content active" id="tab-bio">
+
+          <iframe id="conejo-frame" src="/conejo.html" title="Decoración animada" scrolling="no"></iframe>
+
+          <div class="bio-text">
+            <div class="ctitle"><i class="fas fa-star"
+                style="color: var(--neon-pink); margin-right: 8px; font-size: 1.2em;"></i> 나에 대해</div>
+            <p>안녕하세요, 저는 <strong style="color:var(--neon-pink)">멜라니입니다</strong>.<br>저는 제 삶의 일부가 되어주는 사람들에게 친절하고, 예의 바르며,
+              다정하게 대하는 사람입니다. 처음 만나는 사람 앞에서는 수줍고 내성적인 편이지만, 새로운 경험을 발견하고, 다양한 것을 배우며, 호기심을 자극하는 모든 것을 탐구하는 것을 정말
+              좋아합니다.<br><br><span id="promise-text">완벽한 사랑을 약속하진 않겠지만, 진정한 사랑은 약속합니다.</span></p>
+          </div>
+        </div>
+
+
+        <div class="tab-content" id="tab-playlist">
+          <div class="pinner">
+            <div class="pdisk" id="disk"><i class="fas fa-compact-disc"></i></div>
+            <div class="pinfo">
+              <div class="pnow"><i class="fas fa-play"></i> Now Playing</div>
+              <div class="ptname" id="tname">ASAP</div>
+              <div class="ptartist" id="tartist">NewJeans</div>
+              <div class="pbar" id="pbar">
+                <div class="pfill" id="pfill"></div>
+              </div>
+              <div class="trow"><span id="tcur">0:00</span><span id="ttot">2:15</span></div>
+              <div class="pctrl">
+                <button class="cbtn" id="bprev"><i class="fas fa-step-backward"></i></button>
+                <button class="cbtn play" id="bplay"><i class="fas fa-play"></i></button>
+                <button class="cbtn" id="bnext"><i class="fas fa-step-forward"></i></button>
+                <button class="cbtn"><i class="fas fa-volume-high"></i></button>
+              </div>
+            </div>
+            <div class="plside" id="plist"></div>
+          </div>
+        </div>
+
+
+        <div class="tab-content" id="tab-videos">
+          <div class="video-player-wrap">
+            <iframe id="yt-player" src="about:blank" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+            <div class="yt-cover" id="yt-cover">
+              <img id="yt-thumb" src="https://img.youtube.com/vi/6uZy86ePgO0/maxresdefault.jpg" alt="Video preview">
+              <div class="yt-play-btn">▶</div>
+            </div>
+          </div>
+          <div class="video-playlist-text">
+            <span class="vtrack active" data-video="6uZy86ePgO0">Itzy - Boys like you</span>
+            <span class="vsep">|</span>
+            <span class="vtrack" data-video="Q3K0TOvTOno">NewJeans - How Sweet</span>
+            <span class="vsep">|</span>
+            <span class="vtrack" data-video="83C3TZ4Zm_o">Aespa - Lemonade</span>
+            <span class="vsep">|</span>
+            <span class="vtrack" data-video="dyRsYk0LyA8">Blackpink - Lovesick Girls</span>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-galeria">
+          <div class="gallery-panel-container">
+            <div class="bg-deco-card deco-left">
+              <img id="imgLeft" src="/img2.jpg" alt="Photocard">
+            </div>
+
+            <div class="stack-container-galeria" id="tinderStack">
+              <div class="card-galeria vB-card pos-1">
+                <img src="/xatspace/assets/11-BYrGVxxh.jpg" alt="Foto 1">
+                <div class="pov"><span class="plabel"><i class="fas fa-moon"
+                      style="color: var(--neon-pink); margin-right: 6px;"></i>After Midnight</span></div>
+              </div>
+              <div class="card-galeria vB-card pos-2">
+                <img src="/xatspace/assets/22-DguOirf0.jpg" alt="Foto 2">
+                <div class="pov"><span class="plabel"><i class="fas fa-bolt"
+                      style="color: var(--neon-pink); margin-right: 6px;"></i>Lost in Neon</span></div>
+              </div>
+              <div class="card-galeria vB-card pos-3">
+                <img src="/xatspace/assets/44-B3UO5v25.jpg" alt="Foto 3">
+                <div class="pov"><span class="plabel"><i class="fas fa-wind"
+                      style="color: var(--neon-pink); margin-right: 6px;"></i>Soft Chaos</span></div>
+              </div>
+            </div>
+
+            <div class="bg-deco-card deco-right">
+              <img id="imgRight" src="/img3.jpg" alt="Photocard">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <footer id="foot">Created with - by Melanie &nbsp;•&nbsp; © 2026 &nbsp;•&nbsp; xat.com</footer>
+  </div>
+
+</body>
+
+</html>

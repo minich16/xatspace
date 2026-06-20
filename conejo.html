@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conejo K-pop Animado v3 - Orejas Corregidas</title>
+    <style>
+        body {
+            margin: 0; padding: 0;
+            background: transparent;
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh;
+        }
+        canvas { display: block; background: transparent; }
+    </style>
+</head>
+<body>
+<canvas id="canvasConejo"></canvas>
+<script>
+const canvas = document.getElementById('canvasConejo');
+const ctx = canvas.getContext('2d');
+canvas.width = 950;
+canvas.height = 450;
+
+const SUELO_MAX = canvas.height - 30;
+const SUELO_MIN = canvas.height - 110;
+
+// ── Estrellitas flotantes de fondo ──────────────────────────
+const estrellasFondo = [];
+for (let i = 0; i < 28; i++) {
+    estrellasFondo.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height * 0.85,
+        size: Math.random() * 4 + 2,
+        alpha: Math.random(),
+        vel: Math.random() * 0.015 + 0.008,
+        fase: Math.random() * Math.PI * 2,
+        tipo: Math.floor(Math.random() * 3),
+        color: ['#ff88cc','#cc88ff','#ffddee','#ffaaff','#ffffff'][Math.floor(Math.random()*5)]
+    });
+}
+
+function dibujarEstrellitaFondo(e, t) {
+    const alpha = 0.3 + 0.7 * Math.abs(Math.sin(t * e.vel + e.fase));
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = e.color;
+    ctx.strokeStyle = e.color;
+    ctx.translate(e.x, e.y);
+
+    if (e.tipo === 0) {
+        ctx.rotate(t * e.vel * 0.5 + e.fase);
+        for (let i = 0; i < 4; i++) {
+            ctx.rotate(Math.PI / 2);
+            ctx.beginPath();
+            ctx.moveTo(0,0); ctx.lineTo(e.size*0.3,e.size*0.3);
+            ctx.lineTo(0,e.size); ctx.lineTo(-e.size*0.3,e.size*0.3);
+            ctx.closePath(); ctx.fill();
+        }
+    } else if (e.tipo === 1) {
+        ctx.rotate(t * e.vel * 0.3 + e.fase);
+        ctx.lineWidth = 1.5;
+        ctx.lineCap = 'round';
+        const s = e.size * 1.4;
+        ctx.beginPath(); ctx.moveTo(0,-s); ctx.lineTo(0,s); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-s,0); ctx.lineTo(s,0); ctx.stroke();
+        ctx.rotate(Math.PI/4);
+        ctx.beginPath(); ctx.moveTo(0,-s*0.6); ctx.lineTo(0,s*0.6); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-s*0.6,0); ctx.lineTo(s*0.6,0); ctx.stroke();
+    } else {
+        ctx.beginPath(); ctx.arc(0, 0, e.size * 0.7, 0, Math.PI*2); ctx.fill();
+        ctx.globalAlpha = alpha * 0.4;
+        ctx.beginPath(); ctx.arc(0, 0, e.size * 1.4, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+}
+
+// ── Partículas ───────────────────────────────────────────────
+const particulas = [];
+function crearParticula(x, y) {
+    particulas.push({
+        x, y,
+        vx: (Math.random()-0.5)*3,
+        vy: -(Math.random()*2.5+1.5),
+        alpha: 1,
+        size: Math.random()*5+4,
+        tipo: Math.random()>0.5?'corazon':'estrella',
+        color: Math.random()>0.5?'#ff69b4':'#cc88ff',
+    });
+}
+function actualizarParticulas() {
+    for (let i = particulas.length-1; i>=0; i--) {
+        const p = particulas[i];
+        p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; p.alpha-=0.022;
+        if (p.alpha<=0) particulas.splice(i,1);
+    }
+}
+function renderizarParticulas() {
+    for (const p of particulas) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.fillStyle = p.color;
+        ctx.translate(p.x, p.y);
+        if (p.tipo==='corazon') {
+            const s=p.size/10; ctx.scale(s,s);
+            ctx.beginPath();
+            ctx.moveTo(0,-2); ctx.bezierCurveTo(0,-6,-6,-6,-6,-2);
+            ctx.bezierCurveTo(-6,2,0,6,0,8);
+            ctx.bezierCurveTo(0,6,6,2,6,-2);
+            ctx.bezierCurveTo(6,-6,0,-6,0,-2); ctx.fill();
+        } else {
+            ctx.rotate(p.alpha*4);
+            for (let i=0;i<4;i++) {
+                ctx.rotate(Math.PI/2);
+                ctx.beginPath();
+                ctx.moveTo(0,0); ctx.lineTo(p.size*0.3,p.size*0.3);
+                ctx.lineTo(0,p.size); ctx.lineTo(-p.size*0.3,p.size*0.3);
+                ctx.closePath(); ctx.fill();
+            }
+        }
+        ctx.restore();
+    }
+}
+
+// ── Conejo ───────────────────────────────────────────────────
+const conejo = {
+    x: canvas.width/2, y: SUELO_MAX-80, z: 1.0,
+    lineaSueloActual: SUELO_MAX,
+    velocidadX:0, velocidadY:0, velocidadZ:0,
+    gravedad:0.54, fuerzaSalto:-13,
+    enElSuelo:true, esperandoSalto:false,
+    tick:0, saltosHechos:0,
+
+    dibujarOreja(baseX, baseY, largo, ancho, angulo, colorOuter, colorInner) {
+        ctx.save();
+        ctx.translate(baseX, baseY);
+        ctx.rotate(angulo);
+        ctx.fillStyle = colorOuter;
+        ctx.beginPath();
+        ctx.ellipse(0, -largo/2, ancho, largo/2, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = colorInner;
+        ctx.beginPath();
+        ctx.ellipse(0, -largo/2 + 4, ancho*0.55, largo/2 - 6, 0, 0, Math.PI*2);
+        ctx.fill();
+        // Brillo punta de oreja
+        ctx.fillStyle = 'rgba(255,230,245,0.55)';
+        ctx.beginPath();
+        ctx.ellipse(ancho*0.2, -largo+6, ancho*0.22, 6, -0.3, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+    },
+
+    dibujar() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        let extT=0, extD=0, scX=1, scY=1;
+        const dir = this.velocidadX < 0 ? -1 : 1;
+
+        if (!this.enElSuelo) {
+            if (this.velocidadY < 0) {
+                extT=-18; extD=12; scX=1.11; scY=0.91;
+            } else {
+                extT=5; extD=5; scX=1.0; scY=1.05;
+            }
+        } else {
+            scX=0.87; scY=1.13;
+        }
+
+        ctx.scale(scX * this.z * dir, scY * this.z);
+        if (dir === -1) ctx.translate(-52, 0);
+
+        // Sombra suelo
+        ctx.save();
+        ctx.scale(1/scX, 1/scY);
+        const sy = 78 * scY;
+        const gs = ctx.createRadialGradient(26,sy+6,1,26,sy+6,34*this.z);
+        gs.addColorStop(0,'rgba(160,50,130,0.28)');
+        gs.addColorStop(1,'rgba(160,50,130,0)');
+        ctx.fillStyle = gs;
+        ctx.beginPath(); ctx.ellipse(26,sy+6,34*this.z,10*this.z,0,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+
+        // Cola
+        ctx.fillStyle = '#f8e8f2';
+        ctx.beginPath(); ctx.arc(-8,52,9.5,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = 'rgba(220,170,210,0.3)';
+        ctx.beginPath(); ctx.arc(-10,54,7,0,Math.PI*2); ctx.fill();
+
+        // ── Orejas Corregidas (Ancladas firmemente a la cabeza) ──
+        this.dibujarOreja(54, 6, 54, 10, 0.35, '#ffffff', '#ffb8d9');
+        this.dibujarOreja(46, 5, 50, 9,  0.48, '#f0e8f5', '#ffc8e4');
+
+        // Cuerpo
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(58,44);
+        ctx.bezierCurveTo(68,32,74,26,76,20);
+        ctx.bezierCurveTo(83,14,82,3,70,1);
+        ctx.bezierCurveTo(64,-1,55,3,53,10);
+        ctx.bezierCurveTo(48,4,42,0,40,8);
+        ctx.bezierCurveTo(36,4,30,0,28,8);
+        ctx.bezierCurveTo(32,14,20,17,10,22);
+        ctx.bezierCurveTo(-5,27,-13,37,-8,51);
+        ctx.bezierCurveTo(-17,50,-21,57,-16,64);
+        ctx.bezierCurveTo(-13,69,-5,67,-2,61);
+        ctx.bezierCurveTo(-5+extT,69,0+extT,77,16+extT,77);
+        ctx.bezierCurveTo(23,74,26,66,20,61);
+        ctx.bezierCurveTo(15,55,18,47,28,47);
+        ctx.bezierCurveTo(36,47,42,51,43,59);
+        ctx.bezierCurveTo(43,62,46+extD,71,49+extD,77);
+        ctx.bezierCurveTo(52+extD,77,55+extD,74,54,68);
+        ctx.bezierCurveTo(51,60,47,52,52,47);
+        ctx.bezierCurveTo(55,45,58,44,58,44);
+        ctx.closePath(); ctx.fill();
+
+        // Sombra lateral (volumen)
+        const gv = ctx.createLinearGradient(65,20,-5,55);
+        gv.addColorStop(0,'rgba(255,255,255,0)');
+        gv.addColorStop(1,'rgba(200,140,190,0.18)');
+        ctx.fillStyle = gv;
+        ctx.beginPath();
+        ctx.moveTo(58,44); ctx.bezierCurveTo(32,14,20,17,10,22);
+        ctx.bezierCurveTo(-5,27,-13,37,-8,51);
+        ctx.bezierCurveTo(-17,50,-21,57,-16,64);
+        ctx.bezierCurveTo(-13,69,-5,67,-2,61);
+        ctx.bezierCurveTo(-5+extT,69,0+extT,77,16+extT,77);
+        ctx.bezierCurveTo(23,74,26,66,20,61);
+        ctx.bezierCurveTo(15,55,18,47,28,47);
+        ctx.bezierCurveTo(36,47,42,51,43,59); ctx.lineTo(52,47);
+        ctx.bezierCurveTo(55,45,58,44,58,44); ctx.fill();
+
+        // Mejillas
+        ctx.fillStyle = 'rgba(255,140,190,0.32)';
+        ctx.beginPath(); ctx.ellipse(71,22,7.5,4.5,0.3,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(56,24,4,3,-0.3,0,Math.PI*2); ctx.fill();
+
+        // Nariz
+        ctx.fillStyle = '#ff99cc';
+        ctx.beginPath(); ctx.ellipse(73.5,17,3.2,2.2,0,0,Math.PI*2); ctx.fill();
+
+        // Sonrisa
+        ctx.strokeStyle = 'rgba(255,120,170,0.5)'; ctx.lineWidth=1; ctx.lineCap='round';
+        ctx.beginPath(); ctx.moveTo(71,20); ctx.quadraticCurveTo(73.5,23,76,20); ctx.stroke();
+
+        // Ojo
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.ellipse(68.5,12,4.5,6,0.2,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#1a0a2e';
+        ctx.beginPath(); ctx.ellipse(68.5,12,3.5,5.2,0.2,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ff69b4';
+        ctx.beginPath(); ctx.ellipse(68.5,12.5,2.2,3.5,0.2,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.ellipse(70.2,9.5,1.4,2.0,0.5,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(67,14,0.8,0.8,0,0,Math.PI*2); ctx.fill();
+
+        // Pestañas
+        ctx.strokeStyle = '#1a0a2e'; ctx.lineWidth=1.1;
+        ctx.beginPath(); ctx.moveTo(64.5,7.5); ctx.lineTo(63,5.5); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(67,6.8); ctx.lineTo(66.5,4.5); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(69.5,7.0); ctx.lineTo(70,4.8); ctx.stroke();
+
+        ctx.restore();
+    },
+
+    actualizar() {
+        this.tick++;
+
+        if (!this.enElSuelo) {
+            this.velocidadY += this.gravedad;
+            this.x += this.velocidadX;
+            this.z += this.velocidadZ;
+            this.z = Math.max(0.44, Math.min(this.z, 1.2));
+            if (this.velocidadY < -8 && this.tick % 4 === 0)
+                crearParticula(this.x + (Math.random()-0.5)*20, this.y - 20);
+        } else {
+            this.velocidadX = 0; this.velocidadZ = 0;
+            if (!this.esperandoSalto) {
+                this.esperandoSalto = true;
+                setTimeout(() => { this.saltar(); this.esperandoSalto = false; },
+                    Math.random() * 200 + 130);
+            }
+        }
+
+        this.y += this.velocidadY;
+        const alt = 77 * this.z;
+        if (this.y + alt >= this.lineaSueloActual) {
+            this.y = this.lineaSueloActual - alt;
+            this.velocidadY = 0; this.enElSuelo = true;
+            if (this.saltosHechos > 0)
+                for (let i=0; i<5; i++)
+                    crearParticula(this.x + (Math.random()-0.5)*30, this.y + alt - 5);
+            this.saltosHechos++;
+        }
+
+        if (this.x < 65 && this.velocidadX < 0)                 this.velocidadX *= -1;
+        if (this.x > canvas.width - 135 && this.velocidadX > 0) this.velocidadX *= -1;
+    },
+
+    saltar() {
+        this.enElSuelo = false;
+        this.velocidadY = this.fuerzaSalto + (Math.random()*2.5 - 1.2);
+        this.velocidadX = (Math.random()>0.5?1:-1) * (Math.random()*5+3.5);
+        const ns = Math.random() * (SUELO_MAX - SUELO_MIN) + SUELO_MIN;
+        this.velocidadZ = ns < this.lineaSueloActual ? -0.012 : 0.012;
+        this.lineaSueloActual = ns;
+    }
+};
+
+function dibujarFondo() {
+    const grd = ctx.createLinearGradient(0, SUELO_MIN, 0, SUELO_MAX+30);
+    grd.addColorStop(0,'rgba(40,10,60,0.0)');
+    grd.addColorStop(1,'rgba(70,10,90,0.22)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, SUELO_MIN, canvas.width, SUELO_MAX - SUELO_MIN + 30);
+}
+
+let tick = 0;
+function animar() {
+    tick++;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    dibujarFondo();
+    for (const e of estrellasFondo) dibujarEstrellitaFondo(e, tick);
+    actualizarParticulas();
+    renderizarParticulas();
+    conejo.actualizar();
+    conejo.dibujar();
+    requestAnimationFrame(animar);
+}
+
+conejo.lineaSueloActual = SUELO_MAX;
+animar();
+</script>
+</body>
+</html>
